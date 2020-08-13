@@ -77,7 +77,9 @@ async def handle_jsonrpc(request):
         dispatcher
     )
 
-    return web.json_response(response.json)
+    return web.json_response(
+        response.json
+    )
 
 
 def is_true(value: str) -> bool:
