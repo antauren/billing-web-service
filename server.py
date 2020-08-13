@@ -72,7 +72,10 @@ async def handle_jsonrpc(request):
     dispatcher['get_balance'] = get_balance
 
     request_dict = await request.json()
-    response = JSONRPCResponseManager.handle(request_dict, dispatcher)
+    response = JSONRPCResponseManager.handle(
+        request_dict,
+        dispatcher
+    )
 
     return web.json_response(response.json)
 
