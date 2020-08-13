@@ -1,4 +1,3 @@
-import json
 import requests
 
 
@@ -14,7 +13,7 @@ def jsonrpc_post(params: dict, id_=None):
 
     payload.update(params)
 
-    response = requests.post(url, json=json.dumps(payload), )
+    response = requests.post(url, json=payload, )
     response.raise_for_status()
 
     return response

@@ -1,4 +1,5 @@
 import os
+import json
 
 from dotenv import load_dotenv
 
@@ -72,13 +73,15 @@ async def handle_jsonrpc(request):
     dispatcher['get_balance'] = get_balance
 
     request_dict = await request.json()
+    request_json = json.dumps(request_dict)
     response = JSONRPCResponseManager.handle(
-        request_dict,
+        request_json,
         dispatcher
     )
 
+    response_dict = json.loads(response.json)
     return web.json_response(
-        response.json
+        response_dict
     )
 
 
