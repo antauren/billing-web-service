@@ -1,11 +1,8 @@
 import os
-import json
 
 from dotenv import load_dotenv
 
 from aiohttp import web
-
-from jsonrpc import JSONRPCResponseManager, dispatcher
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -68,18 +65,23 @@ def get_balance(account_id: int):
 
 
 async def handle_jsonrpc(request):
-    dispatcher['create_account'] = create_account
-    dispatcher['transfer_money'] = transfer_money
-    dispatcher['get_balance'] = get_balance
+    methods = {
+        'create_account': create_account,
+        'transfer_money': transfer_money,
+        'get_balance': get_balance,
+    }
 
     request_dict = await request.json()
-    request_json = json.dumps(request_dict)
-    response = JSONRPCResponseManager.handle(
-        request_json,
-        dispatcher
-    )
 
-    response_dict = json.loads(response.json)
+    method = methods[request_dict['method']]
+    result = method(*request_dict['params'])
+
+    response_dict = {
+        'result': result,
+        'id': request_dict.get('id', None),
+        'jsonrpc': '2.0'
+    }
+
     return web.json_response(
         response_dict
     )
