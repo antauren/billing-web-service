@@ -35,7 +35,4 @@ def is_rpc_method_specified(request: dict) -> bool:
 def is_params_true(request: dict) -> bool:
     params = request.get('params', [])
 
-    if not (isinstance(params, list) or isinstance(params, dict)):
-        return False
-
-    return True
+    return isinstance(params, list) or isinstance(params, dict)
