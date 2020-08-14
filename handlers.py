@@ -11,7 +11,7 @@ def handle_request(request) -> dict:
                 'id': request.get('id', None)
                 }
 
-    if not (is_method_true(request) and is_params_true(request)):
+    if not (is_rpc_method_specified(request) and is_params_true(request)):
         return {'jsonrpc': '2.0',
                 'error': {'code': -32600, 'message': 'Invalid Request.'},
                 'id': request.get('id', None)
@@ -26,7 +26,7 @@ def is_jsonrpc_version_true(request):
     return isinstance(version, str) and version.startswith('2.')
 
 
-def is_method_true(request: dict) -> bool:
+def is_rpc_method_specified(request: dict) -> bool:
     method = request.get('method', None)
 
     return isinstance(method, str)
