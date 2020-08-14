@@ -8,6 +8,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, create_engine, Float, Boolean
 
+from heandlers import heandle_request
+
 base = declarative_base()
 
 
@@ -66,6 +68,11 @@ def get_balance(account_id: int):
 
 async def handle_jsonrpc(request):
     request_dict = await request.json()
+
+    error_response = heandle_request(request_dict)
+
+    if error_response:
+        return web.json_response(error_response)
 
     methods = {
         'create_account': create_account,
