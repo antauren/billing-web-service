@@ -18,7 +18,7 @@ def handle_request(request: dict, methods: dict) -> dict:
 
     if not (is_rpc_method_specified(request) and is_params_true(request)):
         return {'jsonrpc': '2.0',
-                'error': {'code': -32600, 'message': 'Invalid Request.'},
+                'error': {'code': -32600, 'message': 'Invalid Request'},
                 'id': request.get('id', None)
                 }
 
