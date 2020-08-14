@@ -25,6 +25,11 @@ def main():
     response = requests.post(url, data=payload).json()
     assert response['error']['code'] == -32600
 
+    # Method not found
+    payload = json.dumps({'jsonrpc': '2.0', 'method': 'abcdefghijklmnopqrstuvwxyz'})
+    response = requests.post(url, data=payload).json()
+    assert response['error']['code'] == -32601
+
 
 if __name__ == "__main__":
     main()

@@ -3,8 +3,13 @@ PARSE_ERROR = {'jsonrpc': '2.0',
                'id': None
                }
 
+METHOD_ERROR = {'jsonrpc': '2.0',
+                'error': {'code': -32601, 'message': 'Method not found'},
+                'id': None
+                }
 
-def handle_request(request: dict) -> dict:
+
+def handle_request(request: dict, methods: dict) -> dict:
     if not is_jsonrpc_version_true(request):
         return {'jsonrpc': '2.0',
                 'error': {'code': -32000, 'message': 'The server supports only "jsonrpc 2.0" version request.'},
@@ -16,6 +21,11 @@ def handle_request(request: dict) -> dict:
                 'error': {'code': -32600, 'message': 'Invalid Request.'},
                 'id': request.get('id', None)
                 }
+
+    if request['method'] not in methods:
+        error = METHOD_ERROR.copy()
+        error['id'] = request.get('id', None)
+        return error
 
     return {}
 

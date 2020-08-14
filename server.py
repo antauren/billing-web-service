@@ -80,7 +80,7 @@ async def handle_jsonrpc(request):
         'get_balance': get_balance,
     }
 
-    error_response = handle_request(request_dict)
+    error_response = handle_request(request_dict, methods)
 
     if error_response:
         return web.json_response(error_response)
