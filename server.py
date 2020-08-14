@@ -87,9 +87,11 @@ async def handle_jsonrpc(request):
 
     method = methods[request_dict['method']]
     params = request_dict['params']
-    result = method(
-        *params
-    )
+
+    if isinstance(params, list):
+        result = method(*params)
+    else:
+        result = method(**params)
 
     response_dict = {
         'result': result,

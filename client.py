@@ -20,6 +20,11 @@ def main():
     response = requests.post(url, data=payload).json()
     assert response['error']['code'] == -32600
 
+    # Invalid Request
+    payload = json.dumps({'jsonrpc': '2.0', 'method': 'foo', 'params': -1})
+    response = requests.post(url, data=payload).json()
+    assert response['error']['code'] == -32600
+
 
 if __name__ == "__main__":
     main()

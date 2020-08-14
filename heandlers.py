@@ -11,7 +11,7 @@ def heandle_request(request) -> dict:
                 'id': request.get('id', None)
                 }
 
-    if not is_method_true(request):
+    if not (is_method_true(request) and is_params_true(request)):
         return {'jsonrpc': '2.0',
                 'error': {'code': -32600, 'message': 'Invalid Request.'},
                 'id': request.get('id', None)
@@ -31,6 +31,15 @@ def is_method_true(request: dict) -> bool:
         return False
 
     if not isinstance(method, str):
+        return False
+
+    return True
+
+
+def is_params_true(request: dict) -> bool:
+    params = request.get('params', [])
+
+    if not (isinstance(params, list) or isinstance(params, dict)):
         return False
 
     return True
