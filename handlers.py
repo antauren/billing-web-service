@@ -21,7 +21,9 @@ def handle_request(request) -> dict:
 
 
 def is_jsonrpc_version_true(request):
-    return request.get('jsonrpc', None) == '2.0'
+    version = request.get('jsonrpc', '')
+
+    return isinstance(version, str) and version.startswith('2.')
 
 
 def is_method_true(request: dict) -> bool:
