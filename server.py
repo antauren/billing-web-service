@@ -105,7 +105,7 @@ async def handle_jsonrpc(request):
 
 
 def is_true(value: str) -> bool:
-    return True if value.lower() == 'true' else False
+    return value.lower() == 'true'
 
 
 if __name__ == '__main__':
