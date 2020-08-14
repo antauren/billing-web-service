@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, create_engine, Float, Boolean
 
-from heandlers import heandle_request, parse_error
+from handlers import handle_request, parse_error
 
 base = declarative_base()
 
@@ -74,7 +74,7 @@ async def handle_jsonrpc(request):
     except json.JSONDecodeError:
         return web.json_response(parse_error)
 
-    error_response = heandle_request(request_dict)
+    error_response = handle_request(request_dict)
 
     if error_response:
         return web.json_response(error_response)
