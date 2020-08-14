@@ -1,4 +1,4 @@
-parse_error = {'jsonrpc': '2.0',
+PARSE_ERROR = {'jsonrpc': '2.0',
                'error': {'code': -32700, 'message': 'Parse error'},
                'id': None
                }
