@@ -29,13 +29,7 @@ def is_jsonrpc_version_true(request):
 def is_method_true(request: dict) -> bool:
     method = request.get('method', None)
 
-    if method is None:
-        return False
-
-    if not isinstance(method, str):
-        return False
-
-    return True
+    return isinstance(method, str)
 
 
 def is_params_true(request: dict) -> bool:
