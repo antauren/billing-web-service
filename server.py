@@ -65,13 +65,13 @@ def get_balance(account_id: int):
 
 
 async def handle_jsonrpc(request):
+    request_dict = await request.json()
+
     methods = {
         'create_account': create_account,
         'transfer_money': transfer_money,
         'get_balance': get_balance,
     }
-
-    request_dict = await request.json()
 
     method = methods[request_dict['method']]
     result = method(*request_dict['params'])
