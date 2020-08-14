@@ -86,7 +86,10 @@ async def handle_jsonrpc(request):
     }
 
     method = methods[request_dict['method']]
-    result = method(*request_dict['params'])
+    params = request_dict['params']
+    result = method(
+        *params
+    )
 
     response_dict = {
         'result': result,
