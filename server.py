@@ -1,5 +1,7 @@
 import os
 
+import json
+
 from dotenv import load_dotenv
 
 from aiohttp import web
@@ -8,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, create_engine, Float, Boolean
 
-from heandlers import heandle_request
+from heandlers import heandle_request, parse_error
 
 base = declarative_base()
 
@@ -67,7 +69,10 @@ def get_balance(account_id: int):
 
 
 async def handle_jsonrpc(request):
-    request_dict = await request.json()
+    try:
+        request_dict = await request.json()
+    except json.JSONDecodeError:
+        return web.json_response(parse_error)
 
     error_response = heandle_request(request_dict)
 

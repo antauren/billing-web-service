@@ -1,3 +1,9 @@
+parse_error = {'jsonrpc': '2.0',
+               'error': {'code': -32700, 'message': 'Parse error'},
+               'id': None
+               }
+
+
 def heandle_request(request) -> dict:
     if not is_jsonrpc_version_true(request):
         return {'jsonrpc': '2.0',
