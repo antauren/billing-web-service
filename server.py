@@ -74,16 +74,16 @@ async def handle_jsonrpc(request):
     except json.JSONDecodeError:
         return web.json_response(PARSE_ERROR)
 
-    error_response = handle_request(request_dict)
-
-    if error_response:
-        return web.json_response(error_response)
-
     methods = {
         'create_account': create_account,
         'transfer_money': transfer_money,
         'get_balance': get_balance,
     }
+
+    error_response = handle_request(request_dict)
+
+    if error_response:
+        return web.json_response(error_response)
 
     method = methods[request_dict['method']]
     params = request_dict['params']
