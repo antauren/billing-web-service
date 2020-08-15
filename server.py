@@ -11,6 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, create_engine, Float, Boolean
 
 from handlers import handle_request, PARSE_ERROR, PARAMS_ERROR
+from validators import validator
 
 base = declarative_base()
 
@@ -38,6 +39,7 @@ def get_session(db, echo=False):
     return session
 
 
+@validator
 def create_account(name: str, overdraft: bool, amount=0):
     account = Account(name=name, overdraft=overdraft, amount=amount)
 
@@ -47,6 +49,7 @@ def create_account(name: str, overdraft: bool, amount=0):
     return account.id
 
 
+@validator
 def transfer_money(donor_id: int, recipient_id: int, amount: int):
     donor = session.query(Account).get(donor_id)
     recipient = session.query(Account).get(recipient_id)
@@ -62,6 +65,7 @@ def transfer_money(donor_id: int, recipient_id: int, amount: int):
     return True
 
 
+@validator
 def get_balance(account_id: int):
     account = session.query(Account).get(account_id)
 
