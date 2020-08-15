@@ -8,6 +8,11 @@ METHOD_ERROR = {'jsonrpc': '2.0',
                 'id': None
                 }
 
+PARAMS_ERROR = {'jsonrpc': '2.0',
+                'error': {'code': -32602, 'message': 'Invalid params'},
+                'id': None
+                }
+
 
 def handle_request(request: dict, methods: dict) -> dict:
     if not is_jsonrpc_version_true(request):

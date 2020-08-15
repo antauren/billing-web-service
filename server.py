@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, create_engine, Float, Boolean
 
-from handlers import handle_request, PARSE_ERROR
+from handlers import handle_request, PARSE_ERROR, PARAMS_ERROR
 
 base = declarative_base()
 
@@ -86,12 +86,19 @@ async def handle_jsonrpc(request):
         return web.json_response(error_response)
 
     method = methods[request_dict['method']]
-    params = request_dict['params']
+    params = request_dict.get('params', [])
 
-    if isinstance(params, list):
-        result = method(*params)
-    else:
-        result = method(**params)
+    try:
+        if isinstance(params, list):
+            result = method(*params)
+        else:
+            result = method(**params)
+
+    except TypeError:
+        error = PARAMS_ERROR.copy()
+        error['id'] = request_dict.get('id', None)
+
+        return web.json_response(error)
 
     response_dict = {
         'result': result,

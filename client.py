@@ -30,6 +30,11 @@ def main():
     response = requests.post(url, data=payload).json()
     assert response['error']['code'] == -32601
 
+    # Invalid params (params count)
+    payload = json.dumps({'jsonrpc': '2.0', 'method': 'create_account', 'params': ['name_1', False, 0] * 100})
+    response = requests.post(url, data=payload).json()
+    assert response['error']['code'] == -32602
+
 
 if __name__ == "__main__":
     main()
