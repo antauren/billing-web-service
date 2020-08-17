@@ -57,8 +57,12 @@ def transfer_money(donor_id: int, recipient_id: int, amount: int):
     if (not donor.overdraft) and (donor.amount - amount < 0):
         return False
 
-    donor.amount -= amount
-    recipient.amount += amount
+    try:
+        donor.amount -= amount
+        recipient.amount += amount
+    except:
+        session.rollback()
+        return False
 
     session.commit()
 
