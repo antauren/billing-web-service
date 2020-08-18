@@ -40,7 +40,7 @@ def get_session(db, echo=False):
 
 
 @validator
-def create_account(name: str, overdraft: bool, amount=0):
+async def create_account(name: str, overdraft: bool, amount=0):
     account = Account(name=name, overdraft=overdraft, amount=amount)
 
     session.add(account)
@@ -50,7 +50,7 @@ def create_account(name: str, overdraft: bool, amount=0):
 
 
 @validator
-def transfer_money(donor_id: int, recipient_id: int, amount: int):
+async def transfer_money(donor_id: int, recipient_id: int, amount: int):
     donor = session.query(Account).get(donor_id)
     recipient = session.query(Account).get(recipient_id)
 
@@ -70,7 +70,7 @@ def transfer_money(donor_id: int, recipient_id: int, amount: int):
 
 
 @validator
-def get_balance(account_id: int):
+async def get_balance(account_id: int):
     account = session.query(Account).get(account_id)
 
     return account.amount
@@ -98,9 +98,9 @@ async def handle_jsonrpc(request):
 
     try:
         if isinstance(params, list):
-            result = method(*params)
+            result = await method(*params)
         else:
-            result = method(**params)
+            result = await method(**params)
 
     except TypeError:
         error = PARAMS_ERROR.copy()
