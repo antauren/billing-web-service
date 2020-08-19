@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, create_engine, Float, Boolean
 
-from handlers import handle_request, PARSE_ERROR, PARAMS_ERROR
+from handlers import handle_request, PARSE_ERROR, PARAMS_ERROR, UNIDENTIFIED_ERROR
 from validators import validator
 
 base = declarative_base()
@@ -119,6 +119,14 @@ async def handle_jsonrpc(request):
     )
 
 
+async def run_json_rpc_server(request):
+    try:
+        result = await handle_jsonrpc(request)
+        return result
+    except:
+        return web.json_response(UNIDENTIFIED_ERROR)
+
+
 def is_true(value: str) -> bool:
     return value.lower() == 'true'
 
@@ -133,7 +141,7 @@ if __name__ == '__main__':
 
     app = web.Application()
     app.add_routes([
-        web.post('/jsonrpc', handle_jsonrpc),
+        web.post('/jsonrpc', run_json_rpc_server),
     ])
 
     web.run_app(app,

@@ -13,6 +13,11 @@ PARAMS_ERROR = {'jsonrpc': '2.0',
                 'id': None
                 }
 
+UNIDENTIFIED_ERROR = {'jsonrpc': '2.0',
+                      'error': {'code': -32099, 'message': 'Server error'},
+                      'id': None
+                      }
+
 
 def handle_request(request: dict, methods: dict) -> dict:
     if not is_jsonrpc_version_true(request):
