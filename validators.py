@@ -32,7 +32,7 @@ def validator(func):
                               'get_balance': validate_get_balance
                               }
 
-        validate_functions[func.__name__](*args, **kwargs)
+        validate_functions[func.__name__](*args[1:], **kwargs)
 
         return func(*args, **kwargs)
 
