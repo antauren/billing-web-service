@@ -134,8 +134,17 @@ def is_true(value: str) -> bool:
 if __name__ == '__main__':
     load_dotenv()
 
+    database = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}'.format(
+
+        user=os.getenv('DATABASE_USERNAME'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        host=os.getenv('DATABASE_HOST'),
+        port=os.getenv('DATABASE_PORT'),
+        dbname=os.getenv('DATABASE_NAME'),
+    )
+
     session = get_session(
-        db=os.getenv('DATABASE'),
+        db=database,
         echo=is_true(os.getenv('DATABASE_DEBUG', '')),
     )
 
