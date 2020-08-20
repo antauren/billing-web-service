@@ -1,75 +1,55 @@
 import json
 import os
+from functools import partial
 
 from aiohttp import web
 from dotenv import load_dotenv
-from sqlalchemy import Boolean, Column, Float, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import sqlalchemy as sa
 
+from db import accounts, close_pg, init_pg, create_sa_transaction_tables
 from handlers import (PARAMS_ERROR, PARSE_ERROR, UNIDENTIFIED_ERROR,
                       handle_request)
 from validators import validator
 
-base = declarative_base()
-
-
-class Account(base):
-    __tablename__ = 'account'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    amount = Column(Float, default=0)
-    overdraft = Column(Boolean)
-
-    def __repr__(self):
-        return '<Account {} {}>'.format(self.id, self.name)
-
-
-def get_session(db, echo=False):
-    engine = create_engine(db, echo=echo)
-
-    base.metadata.create_all(engine)
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    return session
-
 
 @validator
-async def create_account(name: str, overdraft: bool, amount=0):
-    account = Account(name=name, overdraft=overdraft, amount=amount)
-
-    session.add(account)
-    session.commit()
+async def create_account(conn, name: str, overdraft: bool, amount=0):
+    cursor = await conn.execute(sa.insert(accounts).values(name=name, overdraft=overdraft, amount=amount))
+    account = await cursor.fetchone()
 
     return account.id
 
 
 @validator
-async def transfer_money(donor_id: int, recipient_id: int, amount: int):
-    donor = session.query(Account).get(donor_id)
-    recipient = session.query(Account).get(recipient_id)
+async def transfer_money(conn, donor_id: int, recipient_id: int, amount: int):
+    donor_where = accounts.c.id == donor_id
+    donor_query = accounts.select().where(donor_where)
+    donor = await (await conn.execute(donor_query)).fetchone()
+
+    recipient_where = accounts.c.id == recipient_id
+    recipient_query = accounts.select().where(recipient_where)
+    recipient = await (await conn.execute(recipient_query)).fetchone()
 
     if (not donor.overdraft) and (donor.amount - amount < 0):
         return False
 
+    trans = await conn.begin()
     try:
-        donor.amount -= amount
-        recipient.amount += amount
+        await conn.execute(sa.update(accounts).values({'amount': donor.amount - amount}).where(donor_where))
+        await conn.execute(sa.update(accounts).values({'amount': recipient.amount + amount}).where(recipient_where))
     except:
-        session.rollback()
+        await trans.rollback()
         return False
-
-    session.commit()
-
-    return True
+    else:
+        await trans.commit()
+        return True
 
 
 @validator
-async def get_balance(account_id: int):
-    account = session.query(Account).get(account_id)
+async def get_balance(conn, account_id: int):
+    where = accounts.c.id == account_id
+    query = accounts.select().where(where)
+    account = await (await conn.execute(query)).fetchone()
 
     return account.amount
 
@@ -95,10 +75,13 @@ async def handle_jsonrpc(request):
     params = request_dict.get('params', [])
 
     try:
-        if isinstance(params, list):
-            result = await method(*params)
-        else:
-            result = await method(**params)
+        async with request.app['db'].acquire() as conn:
+            await create_sa_transaction_tables(conn)
+
+            if isinstance(params, list):
+                result = await method(conn, *params)
+            else:
+                result = await method(conn, **params)
 
     except TypeError:
         error = PARAMS_ERROR.copy()
@@ -132,7 +115,7 @@ def is_true(value: str) -> bool:
 if __name__ == '__main__':
     load_dotenv()
 
-    database = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}'.format(
+    db_url = 'postgresql://{user}:{password}@{host}:{port}/{dbname}'.format(
 
         user=os.getenv('DATABASE_USERNAME'),
         password=os.getenv('DATABASE_PASSWORD'),
@@ -141,16 +124,13 @@ if __name__ == '__main__':
         dbname=os.getenv('DATABASE_NAME'),
     )
 
-    session = get_session(
-        db=database,
-        echo=is_true(os.getenv('DATABASE_DEBUG', '')),
-    )
-
     app = web.Application()
     app.add_routes([
         web.post('/jsonrpc', run_json_rpc_server),
     ])
 
+    app.on_startup.append(partial(init_pg, db_url=db_url))
+    app.on_cleanup.append(close_pg)
     web.run_app(app,
                 host=os.getenv('SERVER_HOST'),
                 port=os.getenv('SERVER_PORT'),
