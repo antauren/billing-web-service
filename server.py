@@ -1,16 +1,14 @@
+import json
 import os
 
-import json
-
-from dotenv import load_dotenv
-
 from aiohttp import web
-
-from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+from sqlalchemy import Boolean, Column, Float, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, create_engine, Float, Boolean
+from sqlalchemy.orm import sessionmaker
 
-from handlers import handle_request, PARSE_ERROR, PARAMS_ERROR, UNIDENTIFIED_ERROR
+from handlers import (PARAMS_ERROR, PARSE_ERROR, UNIDENTIFIED_ERROR,
+                      handle_request)
 from validators import validator
 
 base = declarative_base()
